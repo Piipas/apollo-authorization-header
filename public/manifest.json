@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Apollo Authorization Header",
+  "version": "1.0.0",
+  "description": "A Chrome extension that allows users to send a request to the authentication endpoint and inject the authorization token into the authorization header in the Apollo GraphQL Playground.",
+  "author": "Your Name",
+  "homepage_url": "https://example.com",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": []
+}
