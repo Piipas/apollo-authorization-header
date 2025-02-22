@@ -3,10 +3,25 @@
   "name": "Apollo Authorization Header",
   "version": "1.0.0",
   "description": "A Chrome extension that allows users to send a request to the authentication endpoint and inject the authorization token into the authorization header in the Apollo GraphQL Playground.",
-  "author": "Your Name",
-  "homepage_url": "https://example.com",
+  "author": "Pipas",
+  "homepage_url": "https://github.com/pipas/apollo-authorization-header",
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": []
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "storage",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["*://*/graphql*"],
+      "js": ["popup.js"]
+    }
+  ]
 }

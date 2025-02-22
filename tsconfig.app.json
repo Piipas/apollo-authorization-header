@@ -27,5 +27,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "background.ts"],
+  "exclude": ["node_modules"]
 }

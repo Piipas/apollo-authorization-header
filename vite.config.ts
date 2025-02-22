@@ -26,7 +26,13 @@ export default defineConfig({
     outDir: "dist",
     rollupOptions: {
       input: {
-        main: "./index.html",
+        background: "./src/background.ts",
+        popup: "./index.html",
+      },
+      output: {
+        entryFileNames: "[name].js",
+        chunkFileNames: "chunks/[name]-[hash].js",
+        assetFileNames: "assets/[name].[ext]",
       },
     },
   },
