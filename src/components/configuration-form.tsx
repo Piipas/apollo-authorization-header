@@ -9,6 +9,7 @@ import { useState } from "react";
 
 const formSchema = z.object({
   endpoint: z.string().url(),
+  token_path: z.string(),
   fields: z.array(
     z.object({
       name: z.string(),
@@ -25,6 +26,7 @@ export function ConfigurationForm() {
     defaultValues: {
       endpoint: "http://localhost:3000/auth/login",
       fields: [{ name: "", value: "" }],
+      token_path: "",
     },
   });
 
@@ -44,7 +46,12 @@ export function ConfigurationForm() {
     chrome.runtime.sendMessage({ type: "makeRequest", url: values.endpoint, payload: transformedData }, (response) => {
       if (response?.success) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          if (tabs?.[0]?.id) chrome.tabs.sendMessage(tabs[0].id, { type: "inject_token", payload: response.data });
+          if (tabs?.[0]?.id)
+            chrome.tabs.sendMessage(tabs[0].id, {
+              type: "inject_token",
+              payload: response.data,
+              token_path: values.token_path,
+            });
         });
       } else if (chrome.runtime.lastError) console.error(chrome.runtime.lastError.message);
       else console.error(response.error);
@@ -64,6 +71,20 @@ export function ConfigurationForm() {
               <FormLabel>Endpoint</FormLabel>
               <FormControl>
                 <Input placeholder="http://localhost:3000/auth/login" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="token_path"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Token Path</FormLabel>
+              <FormControl>
+                <Input placeholder="eg: returned.auth.token.user.path" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

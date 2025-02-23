@@ -1,3 +1,6 @@
+export const getObjectProperty = (obj: Record<string, never>, path: string) =>
+  path.split(".").reduce((acc, key) => acc?.[key], obj as Record<string, never>);
+
 window.addEventListener("message", (event) => {
   if (event.source !== window || event.data.type !== "inject_token") return;
 
@@ -9,7 +12,7 @@ window.addEventListener("message", (event) => {
     if (!editor) throw new Error("CodeMirror instance not found");
 
     const content = editor.getValue().trim();
-    const token = event.data.payload.jwt_token;
+    const token = getObjectProperty(event.data.payload, event.data.token_path);
 
     let headers: Record<string, any> = {};
     if (content) headers = JSON.parse(content);
