@@ -145,9 +145,14 @@ export function ConfigurationForm() {
           Add Field
         </Button>
 
-        <Button type="submit" size={"lg"} disabled={isPending} className="w-full cursor-pointer">
-          {isPending ? "Sending..." : "Send Request"}
-        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button type="submit" size={"lg"} disabled={isPending} className="w-full cursor-pointer">
+            {isPending ? "Sending..." : "Send Request"}
+          </Button>
+          <Button type="button" size={"lg"} className="w-full cursor-pointer">
+            Save
+          </Button>
+        </div>
       </form>
     </Form>
   );
