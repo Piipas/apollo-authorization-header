@@ -5,6 +5,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Plus, X } from "lucide-react";
+import { useState } from "react";
 
 const formSchema = z.object({
   endpoint: z.string().url(),
@@ -17,14 +18,13 @@ const formSchema = z.object({
 });
 
 export function ConfigurationForm() {
+  const [isPending, setIsPending] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       endpoint: "http://localhost:3000/auth/login",
-      fields: [
-        { name: "email", value: "ismailpipas@gmail.com" },
-        { name: "password", value: "123456789" },
-      ],
+      fields: [{ name: "", value: "" }],
     },
   });
 
@@ -34,6 +34,8 @@ export function ConfigurationForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsPending(true);
+
     const transformedData = values.fields.reduce<Record<string, string>>((acc, { name, value }) => {
       acc[name] = value;
       return acc;
@@ -41,10 +43,14 @@ export function ConfigurationForm() {
 
     chrome.runtime.sendMessage({ type: "makeRequest", url: values.endpoint, payload: transformedData }, (response) => {
       if (response?.success) {
-        console.log(response.data);
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs?.[0]?.id) chrome.tabs.sendMessage(tabs[0].id, { type: "inject_token", payload: response.data });
+        });
       } else if (chrome.runtime.lastError) console.error(chrome.runtime.lastError.message);
       else console.error(response.error);
     });
+
+    setIsPending(false);
   }
 
   return (
@@ -107,13 +113,19 @@ export function ConfigurationForm() {
           </div>
         ))}
 
-        <Button type="button" size={"lg"} className="w-full mt-2 cursor-pointer" variant={"outline"} onClick={() => append({ name: "", value: "" })}>
+        <Button
+          type="button"
+          size={"lg"}
+          className="w-full mt-2 cursor-pointer"
+          variant={"outline"}
+          onClick={() => append({ name: "", value: "" })}
+        >
           <Plus />
           Add Field
         </Button>
 
-        <Button type="submit" size={"lg"} className="w-full cursor-pointer">
-          Send Request
+        <Button type="submit" size={"lg"} disabled={isPending} className="w-full cursor-pointer">
+          {isPending ? "Sending..." : "Send Request"}
         </Button>
       </form>
     </Form>

@@ -15,13 +15,23 @@
     "webRequest",
     "webRequestBlocking",
     "storage",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "tabs",
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {
       "matches": ["*://*/graphql*"],
-      "js": ["popup.js"]
+      "js": ["content_script.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["inject_script.js"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

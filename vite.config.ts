@@ -26,8 +26,10 @@ export default defineConfig({
     outDir: "dist",
     rollupOptions: {
       input: {
-        background: "./src/background.ts",
         popup: "./index.html",
+        background: "./src/background.ts",
+        content_script: "./src/content_script.ts",
+        inject_script: "./src/inject_script.ts",
       },
       output: {
         entryFileNames: "[name].js",
