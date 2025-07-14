@@ -6,23 +6,17 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
-
-const formSchema = z.object({
-  endpoint: z.string().url(),
-  token_path: z.string(),
-  fields: z.array(
-    z.object({
-      name: z.string(),
-      value: z.string(),
-    }),
-  ),
-});
+import { requestSchema } from "@/lib/schemas";
+import { useStore } from "@/lib/store";
+import { sendRequest } from "@/lib/helpers";
 
 export function ConfigurationForm() {
   const [isPending, setIsPending] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { addRequest } = useStore();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof requestSchema>>({
+    resolver: zodResolver(requestSchema),
     defaultValues: {
       endpoint: "http://localhost:3000/auth/login",
       fields: [{ name: "", value: "" }],
@@ -35,29 +29,25 @@ export function ConfigurationForm() {
     name: "fields",
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsPending(true);
+  async function onSubmit(values: z.infer<typeof requestSchema>) {
+    try {
+      setIsPending(true);
+      await sendRequest(values);
+    } finally {
+      setIsPending(false);
+    }
+  }
 
-    const transformedData = values.fields.reduce<Record<string, string>>((acc, { name, value }) => {
-      acc[name] = value;
-      return acc;
-    }, {});
+  function onSave(values: z.infer<typeof requestSchema>) {
+    setIsSaving(true);
 
-    chrome.runtime.sendMessage({ type: "makeRequest", url: values.endpoint, payload: transformedData }, (response) => {
-      if (response?.success) {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          if (tabs?.[0]?.id)
-            chrome.tabs.sendMessage(tabs[0].id, {
-              type: "inject_token",
-              payload: response.data,
-              token_path: values.token_path,
-            });
-        });
-      } else if (chrome.runtime.lastError) console.error(chrome.runtime.lastError.message);
-      else console.error(response.error);
-    });
+    const newRequest = { id: new Date().toString(), ...values, timestamp: new Date().toISOString() };
+    addRequest(newRequest);
 
-    setIsPending(false);
+    form.resetField("fields");
+    form.resetField("token_path");
+
+    setIsSaving(false);
   }
 
   return (
@@ -149,8 +139,8 @@ export function ConfigurationForm() {
           <Button type="submit" size={"lg"} disabled={isPending} className="w-full cursor-pointer">
             {isPending ? "Sending..." : "Send Request"}
           </Button>
-          <Button type="button" size={"lg"} className="w-full cursor-pointer">
-            Save
+          <Button type="button" size={"lg"} className="w-full cursor-pointer" onClick={form.handleSubmit(onSave)}>
+            {isSaving ? "Saving..." : "Save"}
           </Button>
         </div>
       </form>

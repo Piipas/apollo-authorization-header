@@ -1,6 +1,6 @@
-import { TabsList } from "@radix-ui/react-tabs";
-import { Tabs, TabsContent, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfigurationCard } from "./components/configuration-card";
+import { SavedCard } from "./components/saved-card";
 
 function App() {
   return (
@@ -12,12 +12,12 @@ function App() {
             <TabsTrigger value="request" className="cursor-pointer">
               Request
             </TabsTrigger>
-            <TabsTrigger value="users" className="cursor-pointer">
+            <TabsTrigger value="saved" className="cursor-pointer">
               Saved
             </TabsTrigger>
           </TabsList>
           <ConfigurationCard />
-          <TabsContent value="users">Hi from users tab</TabsContent>
+          <SavedCard />
         </Tabs>
       </div>
     </div>
